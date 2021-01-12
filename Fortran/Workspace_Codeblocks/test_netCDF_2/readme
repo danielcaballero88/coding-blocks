@@ -1,0 +1,3 @@
+Se crea un data set con dos dimensiones y una variable tipo matriz.
+Se almacena un vector en una de las filas de la matriz.
+Se vuelve a leer ese vector.

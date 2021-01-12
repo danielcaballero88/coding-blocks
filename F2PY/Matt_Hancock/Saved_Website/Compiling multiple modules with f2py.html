@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Compiling multiple modules with f2py</title>
+    <meta name="description" content="For an intro to f2py see here.">
+
+    <link href="Compiling%20multiple%20modules%20with%20f2py_files/css.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="Compiling%20multiple%20modules%20with%20f2py_files/main.css">
+    <link rel="canonical" href="http://notmatthancock.github.com/2017/03/07/multiple-modules-with-f2py.html">
+
+    <link rel="icon" type="image/png" href="https://notmatthancock.github.io/favicon.ico">
+    <!--link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" -->
+    <!--link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" -->
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="https://notmatthancock.github.io/">Matt Hancock </a> <a class="site-title notes-title-link" href="https://notmatthancock.github.io/notes">/ notes</a>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+  <header class="post-header">
+    <h1 class="post-title">Compiling multiple modules with f2py</h1>
+    <p class="post-meta">Mar 7, 2017</p>
+    <div class="post-tags">
+  Tags: 
+  
+  
+  <a href="https://notmatthancock.github.io/notes/tags/#software">software</a>,
+  
+  <a href="https://notmatthancock.github.io/notes/tags/#fortran">fortran</a>,
+  
+  <a href="https://notmatthancock.github.io/notes/tags/#f2py">f2py</a>,
+  
+  <a href="https://notmatthancock.github.io/notes/tags/#python">python</a>,
+  
+  <a href="https://notmatthancock.github.io/notes/tags/#guides">guides</a>
+  
+</div>
+
+  </header>
+
+  <article class="post-content">
+    <p>For an intro to <code class="language-plaintext highlighter-rouge">f2py</code> <a href="https://notmatthancock.github.io/2017/02/10/calling-fortran-from-python.html">see here</a>.</p>
+
+<p>It’s possible to combine multiple Fortran modules into a single shared library to be used by Python using <code class="language-plaintext highlighter-rouge">f2py</code>. It’s actually pretty easy, but I’m writing a note about it because I’ll likely forget how to do it in the future.</p>
+
+<p>Let’s suppose we have two modules, <code class="language-plaintext highlighter-rouge">one.f90</code> and <code class="language-plaintext highlighter-rouge">two.f90</code>. <code class="language-plaintext highlighter-rouge">one</code> uses <code class="language-plaintext highlighter-rouge">two</code>, and we only explicitly want to use the functions in <code class="language-plaintext highlighter-rouge">one</code> from Python.</p>
+
+<p>For example, <code class="language-plaintext highlighter-rouge">one.f90</code> might contain:</p>
+
+<figure class="highlight"><pre><code class="language-fortran" data-lang="fortran"><span class="k">module</span><span class="w"> </span><span class="n">one</span><span class="w">
+</span><span class="k">use</span><span class="w"> </span><span class="n">two</span><span class="w">
+
+</span><span class="k">contains</span><span class="w">
+
+</span><span class="k">function</span><span class="w"> </span><span class="n">onefunc</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w">
+    </span><span class="kt">real</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="p">::</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="w">
+    </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">twofunc</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w">
+    </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">twofunc</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="k">function</span><span class="w">
+
+</span><span class="k">end</span><span class="w"> </span><span class="k">module</span></code></pre></figure>
+
+<p>… while in <code class="language-plaintext highlighter-rouge">two.f90</code>:</p>
+
+<figure class="highlight"><pre><code class="language-fortran" data-lang="fortran"><span class="k">module</span><span class="w"> </span><span class="n">two</span><span class="w">
+</span><span class="k">implicit</span><span class="w"> </span><span class="k">none</span><span class="w">
+
+</span><span class="k">contains</span><span class="w">
+
+</span><span class="k">function</span><span class="w"> </span><span class="n">twofunc</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w">
+    </span><span class="kt">real</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="p">::</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="w">
+    </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="k">function</span><span class="w">
+
+</span><span class="k">end</span><span class="w"> </span><span class="k">module</span></code></pre></figure>
+
+<p>To compile, execute:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">gfortran <span class="nt">-c</span> two.f90
+f2py <span class="nt">-c</span> two.f90 one.f90 <span class="nt">-m</span> one</code></pre></figure>
+
+<p>Now, check that it works in python</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">one</span> <span class="kn">import</span> <span class="n">one</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">one</span><span class="p">.</span><span class="n">onefunc</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># 81.0</span></code></pre></figure>
+
+
+  </article>
+
+  
+  
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <!--h2 class="footer-heading">Matt Hancock</h2-->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Matt Hancock</li>
+          <li><a href="javascript: ee = document.getElementById('footer-email'); es=[110,111,116,46,109,97,116,116,46,104,97,110,99,111,99,107,64,103,109,97,105,108,46,99,111,109].map( function(n) { return String.fromCharCode(n) } ).join(''); ee.innerHTML=es; ee.setAttribute('href','mailto:'+es);" id="footer-email">Click here for email</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/notmatthancock">
+              <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path>
+                </svg>
+              </span>
+
+              <span class="username">notmatthancock</span>
+            </a>
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">Math, notes, ramblings, etc
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  
+
+</body></html>

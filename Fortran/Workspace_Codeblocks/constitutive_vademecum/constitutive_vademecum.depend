@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1555356745 source:/home/dancab/workspace_codeblocks/constitutive_vademecum/src/mod_strings.f90
+
+1555428559 source:/home/dancab/workspace_codeblocks/constitutive_vademecum/src/mod_algebra.f90
+
+1555448137 source:/home/dancab/workspace_codeblocks/constitutive_vademecum/src/mod_bundle.f90
+
+1554747015 source:/home/dancab/workspace_codeblocks/constitutive_vademecum/src/mod_rve.f90
+
+1555426936 source:/home/dancab/workspace_codeblocks/constitutive_vademecum/src/main.f90
+
+1555415573 source:/home/dancab/workspace_codeblocks/constitutive_vademecum/src/mod_vademecum.f90
+
+1555428984 source:/home/dancab/workspace_codeblocks/constitutive_vademecum/src/mod_io.f90
+
+1555351811 source:/home/dancab/workspace_codeblocks/constitutive_vademecum/src/class_parametro.f90
+

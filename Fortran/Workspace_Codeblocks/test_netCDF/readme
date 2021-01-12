@@ -1,0 +1,8 @@
+Pequeño test para empezar a utilizar la biblioteca netCDF
+
+En este ejemplo creo un dataset, defino dimensiones y una variable nueva con esas dimensiones.
+Lleno los valores a partir de una matriz local.
+Cierro el dataset.
+Abro el dataset.
+Leo los valores en una nueva variable.
+Imprimo en pantalla para chequear.

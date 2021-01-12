@@ -1,0 +1,3 @@
+gfortran -Wall -g -ffree-line-length-none -Wall -c aux.f90 -o aux.o
+gfortran -Wall -g -ffree-line-length-none -Wall -c main.f90 -o main.o
+gfortran -o main.exe aux.o main.o

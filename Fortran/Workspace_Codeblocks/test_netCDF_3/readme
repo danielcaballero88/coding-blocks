@@ -1,0 +1,3 @@
+Se crea un dataset con tres dimensiones y una variable de orden 3 (:,:,:)
+Se crea una matriz local (:,:) y se almacena en la direccion (:,:,1)
+Se vuelve a leer
