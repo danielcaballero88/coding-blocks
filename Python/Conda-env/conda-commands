@@ -1,0 +1,43 @@
+conda commands
+
+ACTIVAR Y DESACTIVAR ENTORNOS
+
+conda activate env-name     (si el env esta en miniconda3/envs/)
+conda activate ./env-name   (si el env esta en una carpeta personalizada)
+conda deactivate
+
+CREAR ENTORNOS
+
+conda create --name env-name python numpy ...   (--name = -n)     env en miniconda3/envs/
+conda create --prefix ./env-name python numpy ...  (--prefix = -p)     env en carpeta personalizada
+
+ELIMINAR ENTORNOS
+
+conda remove --name env-name --all
+conda remove --prefix  ./env-name --all
+
+VER ENTORNOS
+
+conda env list  
+conda info --envs   (ambas opciones son iguales)
+
+INSTALAR PAQUETES 
+
+conda install <package>                        en el entorno actual o en "base" si no hay entorno activo
+conda install -n env-name <package>            en el entorno que se indique 
+conda install -p ./env-name <package>          todavia no lo he probado pero debe funcionar
+
+DESINSTALAR PAQUETES
+
+conda remove <package>
+conda remove -n env-name <package> 
+
+EXPORTAR ARCHIVO YML DE ENTORNO (las dependencias para replicarlo en otra parte)
+
+conda env export > environment.yml  
+conda env export --from-history > environment.yml 
+
+IMPORTAR ENTORNO DE ARCHIVO YML
+
+conda env create -f environment.yml
+conda env create -f environment.yml -p ./env-name 

@@ -1,0 +1,9 @@
+name: /home/dancab/Documents/test-venv/testenv4
+channels:
+  - defaults
+dependencies:
+  - matplotlib
+  - python
+  - numpy
+prefix: /home/dancab/Documents/test-venv/testenv6
+

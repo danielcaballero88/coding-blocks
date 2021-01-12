@@ -1,0 +1,46 @@
+Metadata-Version: 2.1
+Name: example-pkg-khawabonga
+Version: 0.0.3
+Summary: A small example package
+Home-page: https://github.com/pypa/sampleproject
+Author: Example Author
+Author-email: author@example.com
+License: UNKNOWN
+Description: # Example Package
+        
+        This is a simple example package. You can use
+        [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
+        to write your content.
+        
+        # Notas mias (Dancab) 
+        
+        ## Lo primero: tener una estructura de directorio correcta. 
+        
+        Para eso hay que saber diferenciar entre lo que es el proyecto y lo que es el paquete (o los paquetes, puede haber varios). El primer directorio es el directorio del proyecto, y dentro de este debe haber un directorio para cada paquete. Esto puede resultar confuso porque en la mayoria de los tutoriales (manga de hdps) usan el mismo nombre para ambas cosas, exceptuando quizas una mayuscula de mas en alguno de los dos.
+        Ademas, dentro de la carpeta del paquete (o package, claro) puede haber mas carpetas con subpackages. Es importante notar que cada package (directorio) se identifica por tener un archivo `__init__.py` (aunque parece que esto fue asi en una epoca y ya no es mas necesario, pero sigue siendo buena practica? Quien sabe) y puede tener un numero variable de modulos (archivos `.py`).
+        Un ejemplo de estructura que dan en un [tutorial][1] es:
+        
+        ```
+        funniest/
+            funniest/
+                __init__.py
+            setup.py
+        ```
+        
+        En el caso anterior, el primer directorio `funniest` podria tener cualquier nombre, no interesa (creo), y seria el directorio del proyecto. El archivo `__setup__.py` es donde se encuentra toda la configuracion para la instalacion de los packages. Luego, la segunda carpeta `funniest` constituye el paquete. Esto es un poco confuso por culpa de los nombres de mierda que tienen las carpetas. Es mas facilmente entendible con esta otra estructura:
+        
+        ```
+        proyecto/
+            modulo/
+                __init__.py
+            setup.py
+        ```
+        
+        [1]: https://python-packaging.readthedocs.io/en/latest/minimal.html
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
