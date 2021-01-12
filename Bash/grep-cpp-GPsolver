@@ -1,0 +1,3 @@
+# Use this command to grep all the files that use cpp (c preprocesor) in the GPsolver project 
+
+grep -B 3 'cpp' .cproject | grep '.f90' | awk '{print $3}'

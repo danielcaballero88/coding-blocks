@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# To run a dettached program do this:
+# program <args> &>/dev/null & disown

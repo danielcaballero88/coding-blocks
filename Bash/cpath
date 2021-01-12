@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#
+# Copy the path of a file into the clipboard
+
+readlink -f $1 | head -c -1 | xsel -b

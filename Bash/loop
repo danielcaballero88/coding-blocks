@@ -1,0 +1,14 @@
+#!/usr/bin/env bash 
+
+if [ -n "$1" ]; then 
+    echo "First arguent given: $1"
+    n=$1
+else 
+    echo "First argument missing, default: 5"
+    n=5
+fi  
+
+echo "Loop from 1 to $n"
+for i in `seq 1 $n`; do
+    echo $i
+done
