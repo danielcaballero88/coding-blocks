@@ -1,0 +1,3 @@
+cp ./mesh/MeshMD.txt Mesh.txt
+cp ./mesh/IniFileMD.txt IniFile_0.txt
+cp ./mesh/ParamMD.txt Param_0.txt

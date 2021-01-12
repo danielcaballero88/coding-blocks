@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# user: a
+# public IP: 190.221.34.91
+
+#ssh a@190.221.34.91 -p22022 -C
+
+# doble tunel directo a tu maquina
+tuUsuario=dancab
+tuIpLocal=10.2.40.10
+someport=1234
+
+if [ "$1" = "fm" ]; then
+	#command to create port to access trough file manager
+	echo "created port to access giac trough file manager"
+	echo "use: ssh://localhost:1234"
+	ssh -L ${someport}:${tuIpLocal}:22 a@190.221.34.91 -p22022
+else
+	#command to access trough terminal
+	# original command: ssh -C a@190.221.34.91 -p22022 -t ssh ${tuUsuario}@${tuIpLocal}
+	ssh -t -C a@190.221.34.91 -p22022 ssh ${tuUsuario}@${tuIpLocal}
+fi

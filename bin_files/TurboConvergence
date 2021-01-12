@@ -1,0 +1,278 @@
+#!/usr/bin/octave -qf
+clear all;
+
+printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n");
+printf("                     TurboConvergence                        \n");
+printf("                      Version: 2.0                           \n");
+printf(" 		    N.Biocca & D.Caballero		     \n");
+printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n");
+
+%{
+% decides the behavior
+arg_list = argv ();
+arg_num  = size(argv,1);
+%num = str2num(arg_list{1});
+
+%arg_list = char(arg_list);	% converts cell data to char array data
+
+if (arg_num == 0)
+	OnlyOnce   = true;
+	Persistent = false;
+endif
+
+if (arg_num != 0) 
+    OnlyOnce   = false;
+    Persistent = true;
+	refreshTime = str2num(char(arg_list(strmatch("-t",arg_list,"exact") + 1))); 
+endif
+%}
+
+%======================================================================
+%initialization of variables
+colors = 'brgkcmy'; %color array for plots in a loop
+basparamName = "Basparam.txt"; 
+logfileName = "logfile.log";
+maxitershow = 0; %in case no value is given, will plot all iterations found
+persistentMode = 0;
+onlyOnce    = 1;
+%======================================================================
+
+%======================================================================
+%check arguments for options of execution
+arglist = argv();
+argnum  = size(argv,1);
+
+for i=1:argnum 
+  argum = char(arglist(i));
+  %check for looper 
+  aux   = strfind(argum,'-t');
+  if ( max(size(aux)) > 0 )
+    refreshTime = str2num(char(arglist(i+1)));
+    persistentMode = 1;
+    onlyOnce       = 0;
+    fprintf("persistent mode on - close figures to finish \n");
+  endif 
+  %check for maxitershow 
+  aux1  = strfind(argum,'-n');
+  aux2  = strfind(argum,'-no');
+  if ( (max(size(aux1)) > 0) && (max(size(aux2)) < 1 ) )
+    maxitershow = str2num(char(arglist(i+1)));
+  endif 
+  %check for input logfilename
+  aux   = strfind(argum,'--log');
+  if ( (max(size(aux)) > 0 ) )
+    logfileName = char(arglist(i+1));
+  endif
+endfor
+%======================================================================
+
+tic
+
+%======================================================================
+%READ Basparam and get information about substeps and dofs
+
+%get list of substeps in any order and count the nSubsteps and iDofT
+CommandLine = sprintf("grep -A 2 '*CheckConvergence' %s",basparamName);
+%get string with the output of CommandLine
+[ierr,output] = system(CommandLine);
+%convert such output into a cell array
+output      = strread(output, '%s', 'delimiter', '\n');
+%convert the cell array into a two dimensional array of chars
+output      = char(output);
+aux         = char(strsplit(output(2,:)));
+%get array of substep list and count the number of substeps
+SubSteps    = str2num(aux);
+nSubSteps   = size(SubSteps,1);
+%get iDofT by counting the dofs list
+aux         = char(strsplit(output(3,:)));
+iDofT       = size(aux,1) -1;
+%number of lines to grep from logfile.log per each iteration
+linesperiter= 1 + 2 + iDofT;
+linestogrep = linesperiter - 1;
+%grep, again from Basparam, knowing nSubSteps, the information about dofs to plot
+CommandLine = sprintf("grep -A %d '*CheckConvergence' %s",1+nSubSteps,basparamName);
+[ierr,output] = system(CommandLine);
+output      = char(strread(output, '%s', 'delimiter', '\n'));
+%get the dofnames
+DOFnames = cell(nSubSteps,iDofT);
+aux      = cell(nSubSteps);
+aux      = output(2+1:2+nSubSteps,:);
+for n=1:nSubSteps
+  aux2          = strsplit(aux(n,:));
+  DOFnames(n,:) = aux2(1:end-1);
+endfor 
+% check the dofnames for dofs to ignore 
+DOFignore  = zeros(iDofT,nSubSteps);
+ActiveDOFs = zeros(nSubSteps,1);
+for n=1:nSubSteps
+  DOFnamesL = char(DOFnames(n,:));
+  for i=1:iDofT
+    if (DOFnamesL(i,1) == "!")
+      DOFignore(i,n) = 1;
+    else 
+      ActiveDOFs(n)      = ActiveDOFs(n) + 1;
+      DOFids(ActiveDOFs(n),n) = i;
+    endif 
+  endfor 
+endfor
+%======================================================================
+
+
+
+%toc
+
+%======================================================================
+%LOOP to get into persistent mode
+do
+  %======================================================================
+  %LOOP for substeps, for each substep, logfile.log is grepped to retrieve
+  %convergence information, such information is stored in arrays and plotted
+  for n = 1:nSubSteps
+  
+    %============================================================
+    %grep the lines with substep convergence information to count them
+    %and thus get the amount of iterations performed  for a substep
+    iSubStep = SubSteps(n); %identity of the first substep to grep
+    %get the number of iterations for this substep
+    target        = sprintf(" SubStep = %d ",iSubStep);
+    CommandLine   = sprintf("grep -n '%s' %s",target,logfileName);
+    [ierr,output] = system(CommandLine);
+    output        = char(strread(output, '%s', 'delimiter', '\n'));
+    nitertot      = size(output,1);
+    %------------------------------------------------------------
+    %add protection in case no iterations are yet written in 
+    %logfile.log for SubStep = iSubStep
+    %in such case, the loop must cycle 
+    if (nitertot == 0)
+        fprintf("- - - - - - - - - - - - - - - - -\n");
+        fprintf("No iterations found for SubStep %d \n",iSubStep);
+        fprintf("- - - - - - - - - - - - - - - - -\n");
+        continue
+    endif
+    %------------------------------------------------------------
+    %============================================================
+    
+    %============================================================
+    %limit the number of iterations to show in case there are more than a maximum
+    if ( (maxitershow>0) && (nitertot > maxitershow))
+      niter = maxitershow;
+      %the '(end-maxitershow+1)' line of 'output' and all the following lines are
+      %the ones to be read 
+      aux = output(end-maxitershow+1,:); %go to line of the first iter to show
+      aux = char(strsplit(aux));         %convert to char 
+      aux = aux(1,:);                    %get 
+      aux = strrep(aux,':',' ');
+      firstlinetoread = str2num(aux);
+    else 
+      niter = nitertot;
+      firstlinetoread = 1;  
+    endif   
+    %============================================================
+    
+    %============================================================
+    %use grep to find the substep convergence information
+    %tail is used to read logfile.log from line 'firstlinetoread'
+    target        = sprintf(" SubStep = %d ",iSubStep);
+    CommandLine   = sprintf("tail -n +%d %s| grep -A %d '%s'",...
+                    firstlinetoread,logfileName,linestogrep,target);
+    [ierr,output] = system(CommandLine);
+    output        = char(strread(output, '%s', 'delimiter', '\n'));
+    %------------------------------------------------------------
+    %add protection in case grep encounters an iteration information
+    %in the middle of writing. In such case, grep encounters the 
+    %heading for a substep convergence, but the dofs errors and tols
+    %are not all present, thus the total number of lines in output
+    %is less than the expected
+    expectedLines = niter*linesperiter + (niter-1);
+    actualLines   = size(output,1);
+    if ( actualLines < expectedLines )
+        niter = niter - 1;
+    endif
+    %------------------------------------------------------------
+    %assemble the convergence information into vectors to plot
+    DOFerror = zeros(niter,ActiveDOFs);
+    DOFtol   = zeros(niter,ActiveDOFs);
+    for i=1:niter
+      %pointing to before of the first line of each iteration
+      ip_row = (i-1)*(linesperiter+1);
+      for j=1:ActiveDOFs(n)
+        %pointing to the line of the dof in the iteration
+        ip_dof        = ip_row + 3 + DOFids(j,n);
+        %store the data of all the iterations into an array
+        aux           = char(strsplit(output(ip_dof,:)));
+        DOFerror(i,j) = str2num(aux(2,:));
+        DOFtol(i,j)   = str2num(aux(3,:));
+        %filter DOFerror to avoid zeros for plotting purposes
+        if ( DOFerror(i,j) < 1.0e-16 ) 
+          DOFerror(i,j) = 1.0e-16;
+        endif
+      endfor 
+    endfor 
+    %============================================================
+    
+    %toc
+    
+    %============================================================
+    %plot the information for each given substep
+    DOFnamesL = char(DOFnames(n,:));
+    legendInfo = [];
+    figure(n)
+    clf(n)
+    hold on 
+    grid on
+    for i=1:ActiveDOFs(n)
+
+      %get current axis and set logaritmic scale on y axis
+      set(gca, 'YScale', 'log')
+      errplot = plot(DOFerror(:,i));
+      tolplot = plot(DOFtol(:,i),"linewidth",1);
+      set(errplot,'Color',colors(i),...
+                  'linewidth',2,...
+                  'Marker','o',...
+                  'markersize',5,...
+                  'MarkerEdgeColor',colors(i),...
+                  'MarkerFaceColor','k')
+      set(tolplot,'Color',colors(i))
+      axis([0, niter]);
+      titlestr = sprintf("Convergence for SubStep = %d",iSubStep);
+      title(titlestr);
+      legendInfo{i} = DOFnamesL(DOFids(i,n),:);
+      
+    end 
+    legend(legendInfo)
+    hold off
+    %============================================================
+    %toc
+    
+  endfor
+  %END substeps loop
+  %======================================================================
+  %check for conditions to end the program while in persitent mode
+  if (persistentMode) pause(refreshTime); endif
+  exitcond   = 1; %initial value to exit
+  for n=1:nSubSteps
+    %if any handle is active then stay in persistent loop (exitcond=0)
+    exitcond = and(exitcond,~ishandle(n));
+    %if any figure is on, then exitcond = 0
+    %if all figures were closed, exitcond = 1
+  endfor  
+  %also, only stay if onlyOnce=0, i.e., persistentMode=1
+  exitcond   = or(exitcond,onlyOnce);
+until ( exitcond )
+%END loop persistent mode
+%======================================================================
+
+if (onlyOnce)
+  %======================================================================
+  %wait until all figures are closed before liberating bash
+  fprintf("END OF PROGRAM - close figures to finish \n");
+  exitcond = 1;
+  while ( exitcond )
+    exitcond = 0;
+    for n=1:nSubSteps
+      exitcond = or(exitcond,ishandle(n));
+    endfor 
+    pause(0.5)
+  endwhile
+  %======================================================================
+endif

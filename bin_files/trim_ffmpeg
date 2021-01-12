@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#$1 = input file
+#$2 = start time
+#$3 = end time
+#$4 = output file
+
+echo "ffmpeg -i $1 -ss $2 -to $3 -c copy $4"

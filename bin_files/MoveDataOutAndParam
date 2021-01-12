@@ -1,0 +1,5 @@
+rm -r output
+mkdir output
+mv DataOutN-* ./output
+mv DataOutE-* ./output
+mv ParaOutN-* ./output
