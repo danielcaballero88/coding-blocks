@@ -2,9 +2,6 @@
 Let's check the Movie object information
 """
 
-"""
-Let's print a nice list of movies
-"""
 from imdb import IMDb
 
 ia =  IMDb()
