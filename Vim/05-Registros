@@ -1,9 +1,0 @@
-# Registros (registers) son buffers o algo asi de memoria donde se guarda texto cuando se copia o corta (y o d)
-Para verlos se puede hacer ':reg'
-Para copiar algo dentro de un registro primero se debe indicar el registro con '"', ejemplo: '"2yy" copia toda una linea en el registro 2.
-Por defecto se copia en el registro PRIMARY ('*') al cual tambien se puede acceder haciendo '"*'
-El registro por defecto de UNIX es el CLIPBOARD ('+') el cual tengo configurado como registro default haciendo ':set clipboard=unnamedplus'
-Aca copio algo que saque de un sitio interesante (https://www.brianstorti.com/vim-registers/)
-
-vim automatically populates what is called the numbered registers for us. As expected, these are registers from "0 to "9.
-"0 will always have the content of the latest yank, and the others will have last 9 deleted text, being "1 the newest, and "9 the oldest. So if you yanked some text, you can always refer to it using "0p.
