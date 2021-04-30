@@ -20,7 +20,7 @@ def create_connection(host_name, user_name, user_password):
 
 
 def main():
-    connection = create_connection('localhost', 'root', '')
+    connection = create_connection('localhost', 'root', 'asdd')
 
 if __name__ == '__main__':
     main()
