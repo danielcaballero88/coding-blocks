@@ -1,3 +1,3 @@
 {
-    "python.pythonPath": "condaenv/bin/python"
+    "python.pythonPath": "/home/dancab/miniconda3/envs/sql/bin/python"
 }

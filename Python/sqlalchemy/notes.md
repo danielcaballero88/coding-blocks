@@ -1,0 +1,131 @@
+# Notes about SQLAlchemy
+
+These are very brief notes because, otherwise, it would be the same as reading the docs
+or following the [tutorial](https://docs.sqlalchemy.org/en/14/tutorial/index.html#unified-tutorial).  
+Only very small fragments of text and code snippets with brief comments should appear here.
+
+## Concept
+
+SQLAlchemy is a ORM (Object Relational Mapper) which means that is relates a database and its tables to Python objects.
+
+It's composed of two distinct APIs, a *core* API and a *ORM* API.
+The idea is to use mostly the ORM, but access to the core is still provided, I think.
+
+What is important is that it masks the SQL so the same code can be used with different types of databases.  
+It's only needed to know Python, and some SQL surely.
+
+## The Engine
+
+The engine is the central point of connection to the database.
+
+```
+>>> from sqlalchemy import create_engine
+>>> engine = create_engine("sqlite+pysqlite:///:memory:", echo=True, future=True)
+```
+
+The string form of the URL is `dialect[+driver]://user:password@host/dbname[?key=value..]`, 
+where dialect is a database name such as mysql, oracle, postgresql, etc., 
+and driver the name of a [DBAPI](https://www.oreilly.com/library/view/python-in-a/0596100469/ch11s04.html), 
+such as psycopg2, pyodbc, cx_oracle, etc. 
+Alternatively, the URL can be an instance of [URL](https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.engine.URL).
+
+In this case, our URL includes the phrase `/:memory:`, 
+which is an indicator to the sqlite3 module that we will be using an in-memory-only database.
+
+## Working with Transactions and the DBAPI
+
+### Getting a Connection
+
+As the Connection represents an open resource against the database, 
+we want to always limit the scope of our use of this object to a specific context.
+
+Textual SQL is emitted using a construct called [`text()`](https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.text).
+This function has some advantages over using a plain SQL string.
+
+
+```
+>>> from sqlalchemy import text
+
+>>> with engine.connect() as conn:
+...     result = conn.execute(text("select 'hello world'"))
+...     print(result.all())
+BEGIN (implicit)
+select 'hello world'
+[...] ()
+[('hello world',)]
+ROLLBACK
+```
+The transaction is **not committed automatically**.
+
+### Committing Changes
+
+Two ways:
+1. "Commit as you go": Use `Engine.connect()` -> do some work -> `Connection.commit()` -> repeat or not
+2. "Begin once": Use `Engine.begin()` -> it does the connection and commits at the end
+
+```
+# "commit as you go"
+>>> with engine.connect() as conn:
+...     conn.execute(text("CREATE TABLE some_table (x int, y int)"))
+...     conn.execute(
+...         text("INSERT INTO some_table (x, y) VALUES (:x, :y)"),
+...         [{"x": 1, "y": 1}, {"x": 2, "y": 4}]
+...     )
+...     conn.commit()
+BEGIN (implicit)
+CREATE TABLE some_table (x int, y int)
+[...] ()
+<sqlalchemy.engine.cursor.CursorResult object at 0x...>
+INSERT INTO some_table (x, y) VALUES (?, ?)
+[...] ((1, 1), (2, 4))
+<sqlalchemy.engine.cursor.CursorResult object at 0x...>
+COMMIT
+```
+
+```
+# "begin once"
+>>> with engine.begin() as conn:
+...     conn.execute(
+...         text("INSERT INTO some_table (x, y) VALUES (:x, :y)"),
+...         [{"x": 6, "y": 8}, {"x": 9, "y": 10}]
+...     )
+BEGIN (implicit)
+INSERT INTO some_table (x, y) VALUES (?, ?)
+[...] ((6, 8), (9, 10))
+<sqlalchemy.engine.cursor.CursorResult object at 0x...>
+COMMIT
+```
+
+In both cases we are using "bind parameters":
+Bind parameters are specified by name, using the format `:name`. 
+
+### Basics of Statement Execution
+
+#### Fetching Rows
+
+This illustrates the [`Result`](https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Result) object.
+
+```
+>>> with engine.connect() as conn:
+...     result = conn.execute(text("SELECT x, y FROM some_table"))
+...     for row in result:
+...         print(f"x: {row.x}  y: {row.y}")
+BEGIN (implicit)
+SELECT x, y FROM some_table
+[...] ()
+x: 1  y: 1
+x: 2  y: 4
+x: 6  y: 8
+x: 9  y: 10
+ROLLBACK
+```
+
+Above, the “SELECT” string we executed selected all rows from our table. 
+The object returned is called `Result` and represents an iterable object of result rows.
+
+The [`Row`](https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Row) 
+objects themselves are intended to act like Python [named tuples](https://docs.python.org/3/library/collections.html#collections.namedtuple).
+
+---
+
+Carry on in section "Sending Parameters"
