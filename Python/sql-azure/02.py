@@ -23,8 +23,16 @@ configString += 'PWD={}'.format(PWD)
 
 with pyodbc.connect(configString) as conn:
     with conn.cursor() as cursor:
-        cursor.execute('SELECT TOP 3 name, collation_name FROM sys.databases')
-        row = cursor.fetchone()
-        while row:
-            print (str(row[0]) + ' ' + str(row[1]))
-            row = cursor.fetchone()
+        cursor.execute(
+            '''
+            CREATE TABLE Person
+            (
+                PersonId INT IDENTITY PRIMARY KEY,
+                FirstName NVARCHAR(128) NOT NULL,
+                MiddelInitial NVARCHAR(10),
+                LastName NVARCHAR(128) NOT NULL,
+                DateOfBirth DATE NOT NULL
+            )
+            '''
+        )
+        

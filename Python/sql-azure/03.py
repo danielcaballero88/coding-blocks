@@ -23,7 +23,12 @@ configString += 'PWD={}'.format(PWD)
 
 with pyodbc.connect(configString) as conn:
     with conn.cursor() as cursor:
-        cursor.execute('SELECT TOP 3 name, collation_name FROM sys.databases')
+        cursor.execute(
+            """
+            SELECT *
+            FROM sys.tables
+            """
+        )
         row = cursor.fetchone()
         while row:
             print (str(row[0]) + ' ' + str(row[1]))

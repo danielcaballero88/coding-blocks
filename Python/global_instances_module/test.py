@@ -1,4 +1,8 @@
-import g
+from globals import g
+from module import print_and_increment
 
-def set_a(val):
-    g.set_gvar("a", val)
+g.a = 2
+
+print_and_increment('a')
+
+print(g.a)
