@@ -1,6 +1,19 @@
 import mysql.connector
 from mysql.connector import Error
 
+# ---------------------------------------------------
+# Main
+
+def main():
+    server_connection = connect_to_server('localhost', 'root', 'asdd')    
+    db_name = 'test'
+    dbExists = check_if_db_exists(server_connection, db_name)
+    if not dbExists:
+        create_database(server_connection, db_name)
+
+# ---------------------------------------------------
+# Methods
+
 def connect_to_server(host_name, user_name, user_password):
     print(f'Trying to connect to server using credentials: user={user_name}, pass={user_password}')
     connection = None
@@ -16,30 +29,26 @@ def connect_to_server(host_name, user_name, user_password):
 
     return connection
 
-
 def check_if_db_exists(server_conn, db_name):
-    print(f'Querying to check if there are databases with the name {db_name}')
-    #
+    print('---')
+    print('Checking if db %s exists' % db_name)
     query = (
-        'SELECT SCHEMA_NAME '
-        'FROM INFORMATION_SCHEMA.SCHEMATA '	
-        f'WHERE SCHEMA_NAME = "{db_name}"'
+        "SELECT count(*) "
+        "FROM INFORMATION_SCHEMA.SCHEMATA "	
+        f"WHERE SCHEMA_NAME = '{db_name}'"
     )
-    #
     cursor = server_conn.cursor()
-    #
     try:
         cursor.execute(query)
-        result = cursor.fetchall()
+        result = cursor.fetchone()
+        print(query)
         print('Success')
-        if result:
-            print('There are databases witht the given name')
-        else:
-            print('No databases with the given name')
+        dbExists = result[0]
+        print('db exists? %s' % bool(dbExists))
     except Error as e:
-        print(f'The error "{e}" occurred')
+        print(f'The error {e} occurred')
     #
-    return result
+    return dbExists
 
 def create_database(server_conn, db_name):
     print(f'Trying to create db of name: {db_name}')
@@ -50,13 +59,8 @@ def create_database(server_conn, db_name):
     except Error as e:
         print(f'The error "{e}" occurred')
     
-def main():
-    server_connection = connect_to_server('localhost', 'root', 'asdd')    
-    db_name = 'test'
-    db_list = check_if_db_exists(server_connection, db_name)
-    if not db_list:
-        create_database(server_connection, db_name)
-    
+# ---------------------------------------------------
+# Execute (only if called explicitely as main)
 
 if __name__ == '__main__':
     main()

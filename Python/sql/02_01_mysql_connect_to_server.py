@@ -1,8 +1,14 @@
 import mysql.connector
 from mysql.connector import Error
-import os
 
-HERE = os.path.dirname(__file__)
+# ---------------------------------------------------
+# Main
+
+def main():
+    connection = create_connection('localhost', 'root', 'asdd')
+
+# ---------------------------------------------------
+# Methods
 
 def create_connection(host_name, user_name, user_password):
     conn = None
@@ -18,9 +24,8 @@ def create_connection(host_name, user_name, user_password):
     #
     return conn
 
-
-def main():
-    connection = create_connection('localhost', 'root', 'asdd')
+# ---------------------------------------------------
+# Execute (only if called explicitely as main)
 
 if __name__ == '__main__':
     main()
