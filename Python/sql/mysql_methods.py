@@ -39,13 +39,17 @@ def connect_to_database(host, userName, userPasswd, dbName):
     # Done
     return dbConnection
 
-def execute(connection, query, after=None, close=True):
+def execute(connection, query, after=None, close='cursor', many=False, params=[]):
     """ Helper function to encapsulate exception handling in a single method """
     try:
         logger.debug('Executing query: %s', query)
-        # Execute given query
+        # Get Cursor
         cursor = connection.cursor()
-        cursor.execute(query)
+        # Execute given query
+        if many:
+            cursor.executemany(query, params)
+        else:
+            cursor.execute(query)
         logger.debug('cursor.execute(): Success')
         # Perform after action
         logger.debug('Executing after action: %s', after)
