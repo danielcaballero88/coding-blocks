@@ -134,6 +134,9 @@ class Table:
         self.db = db
         self.name = name
     
+    # ---------------------------------------------
+    # Insert
+
     def insert(self, dbConn, fields, records):
         logger.info('Trying to insert records into table "%s" in database "%s"', self.name, self.db.name)
         logger.debug('Records: %s', records)
@@ -159,6 +162,28 @@ class Table:
         query = 'INSERT INTO %s %s VALUES (%%s, %%s)' % (self.name, fields)
         #
         self.db.execute(dbConn, query, many=True, params=records, after='commit', **kwargs)
+
+    # ---------------------------------------------
+    # Select
+
+    def select(self, dbConn, limit=None, offset=None, where=None, **kwargs):
+        logger.info('Trying to select records from table "%s" in database "%s"', self.name, self.db.name)
+        # Assemble query
+        query = f'SELECT * FROM {self.name}'
+        if where:
+            query += ' WHERE %s' % where
+        if limit:
+            query += ' LIMIT '
+            if offset:
+                query += '%d,' % offset
+            query += '%d' % limit
+        
+        query += ';'
+        logger.debug('Query: %s', query)
+        #
+        kwargs['after'] = kwargs.get('after', 'fetchall')
+        result = self.db.execute(dbConn, query, **kwargs)
+        return result
 
 if __name__ == '__main__':
     try:
@@ -203,6 +228,17 @@ if __name__ == '__main__':
         table.insert(dbConn, fields='(name, age)', records=singleRecord)
         manyRecords = [('Luli', 31), ('Oscar', 61), ('Mama', 65.5555)]
         table.insert(dbConn, fields='(name, age)', records=manyRecords)
+        # Select records
+        records = table.select(dbConn)
+        print(records)
+        records = table.select(dbConn, where='age<40')
+        print(records)
+        records = table.select(dbConn, limit=2)
+        print(records)
+        records = table.select(dbConn, limit=2, offset=1)
+        print(records)
+        records = table.select(dbConn, limit=2, offset=1, where='id>1')
+        print(records)
     
     except Exception as e:
         logger.critical(e.__repr__())
