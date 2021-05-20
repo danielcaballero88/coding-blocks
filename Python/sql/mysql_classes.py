@@ -1,4 +1,3 @@
-import pandas as pd
 import logging
 import mysql_methods
 from dotenv import load_dotenv
