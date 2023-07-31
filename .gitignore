@@ -352,6 +352,7 @@ MigrationBackup/
 # Virtual environments
 condaenv/
 venv/
+.venv
 
 # .env files that are for private variables
 .env
