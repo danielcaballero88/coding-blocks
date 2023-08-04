@@ -1,0 +1,4 @@
+[2023-08-04 07:57:33,275] INFO - This is a info log
+[2023-08-04 07:57:33,275] WARNING - This is a warning log
+[2023-08-04 07:57:33,275] ERROR - This is a error log
+[2023-08-04 07:57:33,275] CRITICAL - This is a critical log
