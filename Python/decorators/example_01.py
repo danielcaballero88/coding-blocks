@@ -3,34 +3,44 @@
 # A decorator is a function that wraps another function
 # Therefore it can change what the function does
 
+
 # I create a decorator
 def function_decorator(func):
+    """Example decorator 01, no arguments."""
     def wrapped_func():
         # ---
         # Do something before the function is executed
-        print('='*30)
+        print("=" * 30)
         # ---
         # Execute function
         func()
         # ---
         # Do something after the function has been executed
-        print('='*30)
+        print("=" * 30)
         # ---
+
     return wrapped_func
 
-# I create a test function to be decorated
-def test():
+
+def function_not_decorated():
+    """Test function to be wrapped by decorator."""
     print("Hello")
 
+
 # I call the function test, decorated
-function_decorator(test)()
+decorated_function = function_decorator(function_not_decorated)
+# (variable) def decorated_test() -> None
+decorated_function()
+
 
 # Ah, but there is some cool syntax for this
 @function_decorator
-def test2():
+def decorated_function_2():
+    """Decorated test function."""
     print("Hello 2")
 
-test2()
+
+decorated_function_2()
 
 # See that test2 is ALWAYS decorated,
 # because the decorator is assigned to it at declaration, and not at execution.

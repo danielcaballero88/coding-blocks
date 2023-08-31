@@ -356,3 +356,6 @@ venv/
 
 # .env files that are for private variables
 .env
+
+# Local configuration files
+.flake8
